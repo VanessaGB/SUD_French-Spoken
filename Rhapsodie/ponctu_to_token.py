@@ -15,7 +15,8 @@ with open('fr_spoken.sud.test.conllu_v3.txt','r',encoding="utf8") as fichier:
             null,torth=fichier[i-4].split(' = ')
             torth=re.sub("'"," ",torth)  # On veille à ce que l'apostrophe ne gêne pas la tokenisation.
             torth=torth.split(" ")
-            n,p,id,tokens,tokens2=0,0,1,"",""
+            n,p,id,tokens,tokens2,l_prec=0,0,1,"","",["x"]
+            dic={}
             # n permet de parcourir les lignes du bloc, p les tokens de la ligne txt, id de récupérer l'id d'un token
             while ligne!="\n":  # On se place dans le bloc formé par les tokens d'une IU.
                 ligne=ligne.split("\t")
@@ -24,10 +25,12 @@ with open('fr_spoken.sud.test.conllu_v3.txt','r',encoding="utf8") as fichier:
                         token=torth[p]
                     p+=1
                 else:
-                    p-=2
-                if "," in token:    # On s'occupe de traiter la virugle.
+                    p-=1
+                if "," in token and not re.match(r"\d+\-\d+",ligne[0]) and not re.match(r"\d+\-\d+",l_prec[0]):
+                    # On s'occupe de traiter la virugle en évitant le pb des formes composées.
                     if p<len(torth):
                         tokens+=str(id)+"\t"+"\t".join(ligne[1:len(ligne)])+f"{id+1}\t,\t,\tPUNCT\t_\t_\tX\tpunct\t_\t_\n"
+                        dic[ligne[0]]=id
                         id+=2
                 # elif "." in token:    # On s'occupe de traiter le point.
                 #     tokens+=str(id)+"\t"+"\t".join(ligne[1:len(ligne)])+f"{id+1}\t.\t.\tPUNCT\t_\t_\tROOT\tpunct\t_\t_\n"
@@ -36,42 +39,27 @@ with open('fr_spoken.sud.test.conllu_v3.txt','r',encoding="utf8") as fichier:
                         tokens+=f"{str(id)}-{str(id+1)}\t"+"\t".join(ligne[1:len(ligne)])
                     else:
                         tokens+=str(id)+"\t"+"\t".join(ligne[1:len(ligne)])
+                        dic[ligne[0]]=id
                         id+=1
                 n+=1
+                l_prec=ligne
                 ligne=fichier[i+n]
             tokens+=f"{id}\t.\t.\tPUNCT\t_\t_\tROOT\tpunct\t_\t_\n"
             tokens=tokens.split("\n")
             del tokens[len(tokens)-1]
-            id,liste_vir=0,[]
-            for token in tokens:    # On récupère la liste des id des virgules.
-                token=token.split("\t")
-                if token[1]==",":
-                    liste_vir.append(token[0])
-                    print(liste_vir)
             for ligne in range(len(tokens)):
                 ligne=tokens[ligne].split("\t")
                 if "root" in ligne[7]:    # On récupère l'id de la racine pour l'indiquer comme gouv du point.
                     root=ligne[0]
-                if ligne[2]==",":   # Pas de traitement ici puisque nous devrons compléter manuellement.
                     tokens2+="\t".join(ligne[0:10])+"\n"
-                    id+=1
+                elif ligne[2]==",":   # Pas de traitement ici puisque nous devrons compléter manuellement.
+                    tokens2+="\t".join(ligne[0:10])+"\n"
                 elif ligne[2]==".": # Le gouverneur du point est toujours la racine.
                     tokens2+="\t".join(ligne[0:6])+"\t"+root+"\t"+"\t".join(ligne[7:10])+"\n"
                 elif re.match(r"\d+\-\d+",ligne[0]) or ligne[6]=="_":   # Ce type de lignes reste identique.
                     tokens2+="\t".join(ligne[0:10])+"\n"
                 else:
-                    vir=0   # On va tester s'il y a une virgule avant le token du gouv, sinon pas de modif.
-                    for i in range(len(liste_vir)):
-                        if int(ligne[6])>int(liste_vir[i]):
-                            if i+1<len(liste_vir):
-                                if int(ligne[6])<int(liste_vir[i+1]):
-                                    tokens2+="\t".join(ligne[0:6])+"\t"+str(int(ligne[6])+(i+1))+"\t"+"\t".join(ligne[7:10])+"\n"
-                                    vir=1
-                            else:
-                                tokens2+="\t".join(ligne[0:6])+"\t"+str(int(ligne[6])+(i+1))+"\t"+"\t".join(ligne[7:10])+"\n"
-                                vir=1
-                    if vir==0:
-                        tokens2+="\t".join(ligne[0:6])+"\t"+str(int(ligne[6]))+"\t"+"\t".join(ligne[7:10])+"\n"
+                    tokens2+="\t".join(ligne[0:6])+"\t"+str(dic[ligne[6]])+"\t"+"\t".join(ligne[7:10])+"\n"
             sortie.write(f"{tokens2}\n")
         else:
             if not re.match(r'\d',fichier[i-1]):
