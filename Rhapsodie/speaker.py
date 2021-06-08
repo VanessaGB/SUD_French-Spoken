@@ -8,16 +8,6 @@ le // pouvant symboliser aussi bien le passage à une autre phrase que celui à 
 La solution semblerait être de se servir de ce script pour une première annotation et d'ensuite se référer aux enregistrements pour éventuellement la corriger.
 """
 
-import re
-
-"""
-Ce script permet de récupérer les id des différents locuteurs dans les fichiers Rhapsodie et de les intégrer dans une copie du fichier de départ.
-Il fonctionne sur la présence des indicateurs de type $L1 en début de ligne.
-On observe cependant que certaines fois le changement de locuteur ne semble pas indiqué et il est donc difficile de le repérer automatiquement,
-le // pouvant symboliser aussi bien le passage à une autre phrase que celui à un autre locuteur visiblement.
-La solution semblerait être de se servir de ce script pour une première annotation et d'ensuite se référer aux enregistrements pour éventuellement la corriger.
-"""
-
 # Cette version sert lorsque l'on utilise ce script dans la toute première phase de traitement.
 # with open('fr_spoken.sud.test.conllu.txt','r',encoding="utf8") as fichier:
 #     fichier=fichier.readlines()
