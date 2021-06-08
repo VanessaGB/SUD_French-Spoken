@@ -50,7 +50,7 @@ with open('full_test_corrige_manuellement_macro2text_fr_spoken.sud.test.conllu.t
                 yes=1
                 #ligne+=1
             else:
-                l1,l2=fichier[ligne+1].split(" = ")
+                l1,l2=fichier[ligne+2].split(" = ")
                 speaker=l2[0:len(l2)-1]
             liste_l=re.findall('\$L\d',l2)
             if len(liste_l)>1:
