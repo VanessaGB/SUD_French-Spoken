@@ -683,7 +683,7 @@ import re
 if __name__ == "__main__":
 	pass
 	#trees = conllFile2trees("sudcorrected/ONI_26_News-Highlights_MG.conllu")
-	trees = conllFile2trees('version_menel_speaker_id.sud.train.txt')
+	trees = conllFile2trees('version_vanessa_speaker_id.sud.txt')
 	print(len(trees))
 	#print(trees[2].conllu())
 	#replaceNodesByTree(idsequence, instree, hook=1, headid=0, keepExtpos=True)
@@ -713,7 +713,10 @@ if __name__ == "__main__":
 	# 		print(f'{tc[1]} est le dépendant de {tc[0]}')
 	# 		cle=tc[1]
 
-	with open('version_menel_speaker_id.sud.train.txt','r',encoding="utf8") as fichier:
+	"""La partie ci-dessous vise à ajouter la ponctuation dans le conll en adaptant les id de chaque
+	tokens et en trouvant automatiquement les gouverneurs des poncutations ajoutées."""
+
+	with open('version_vanessa_speaker_id.sud.txt','r',encoding="utf8") as fichier:
 		fichier=fichier.readlines()
 		sortie=open('fr_spoken.sud.train.conllu.txt','w',encoding="utf8")
 		cpt=0
@@ -772,9 +775,10 @@ if __name__ == "__main__":
 					ligne=fichier[i+n]
 				if ".\n" in token:
 					tokens+=f"{id+1}\t.\t.\tPUNCT\t_\t_\tROOT\tpunct\t_\t_\n"
-				elif "…\n" in token:
+				elif "…" in token:
 					tokens+=f"{id+1}\t…\t…\tPUNCT\t_\t_\tROOT\tpunct\t_\t_\n"
-				elif "?\n" in torth:
+					id+=2
+				if "?\n" in torth:
 					tokens+=f"{id}\t?\t?\tPUNCT\t_\t_\tROOT\tpunct\t_\t_\n"
 				tokens=tokens.split("\n")
 				#print(l_vir)
@@ -873,92 +877,3 @@ if __name__ == "__main__":
 	#print(trees[0].conllu())
 	#open("test.conllu","w").write(trees[0].conllu())
 	
-
-
-# with open('fr_spoken.sud.dev.conllu_macro2txt_spkr.txt','r',encoding="utf8") as fichier:
-#     fichier=fichier.readlines()
-#     sortie=open('fr_spoken.sud.dev.conllu_v4.txt','w',encoding="utf8")
-# 	cpt=0
-#     for i in range(len(fichier)):
-#         ligne=fichier[i]
-#         if re.match(r'\d',ligne) and not re.match(r'\d',fichier[i-1]):
-#             null,torth=fichier[i-3].split(' = ')
-#             torth=re.sub("' ","'",torth)
-#             torth=re.sub("'"," ",torth)  # On veille à ce que l'apostrophe ne gêne pas la tokenisation.
-#             torth=re.sub(" ,",",",torth)
-#             torth=re.sub("-"," ",torth)  # On veille à ce que le tiret ne gêne pas la tokenisation.
-#             torth=re.sub("aujourd hui","aujourd'hui",torth)
-#             torth=re.sub("c est à dire","c'est-à-dire",torth)
-#             torth=re.sub("peut être","peut-être",torth)
-#             torth=re.sub("quelqu un","quelqu'un",torth)
-#             torth=re.sub("vis à vis","vis-à-vis",torth)
-#             torth=re.sub("dix sept","dix-sept",torth)
-#             torth=re.sub("dix huit","dix-huit",torth)
-#             torth=re.sub("vingt deux","vingt-deux",torth)
-#             torth=re.sub("belle mère","belle-mère",torth)
-#             torth=re.sub("rendez vous","rendez-vous",torth)
-#             torth=re.sub("week end","week-end",torth)
-#             torth=re.sub("soi même","soi-même",torth)
-#             torth=re.sub("États Unis","États-Unis",torth)
-#             torth=re.sub("Proche Orient","Proche-Orient",torth)
-#             torth=re.sub("Jean Paul","Jean-Paul",torth)
-#             torth=re.sub("Notre Dame","Notre-Dame",torth)
-#             torth=torth.split(" ")
-#             print(torth)
-#             n,p,id,tokens,tokens2,l_prec=0,0,1,"","",["x"]
-#             dic={}
-#             # n permet de parcourir les lignes du bloc, p les tokens de la ligne txt, id de récupérer l'id d'un token
-#             while ligne!="\n":  # On se place dans le bloc formé par les tokens d'une IU.
-#                 ligne=ligne.split("\t")
-#                 if not re.match(r"\d+\-\d+",ligne[0]):  # On traite le cas où il y a deux tokens en un (2 lignes en +).
-#                     if p<len(torth):
-#                         token=torth[p]
-#                     p+=1
-#                 else:
-#                     p-=1
-#                 if "," in token and not re.match(r"\d+\-\d+",ligne[0]) and not re.match(r"\d+\-\d+",l_prec[0]):
-#                     # On s'occupe de traiter la virugle en évitant le pb des formes composées.
-#                     if p<len(torth):
-#                         tokens+=str(id)+"\t"+"\t".join(ligne[1:len(ligne)])+f"{id+1}\t,\t,\tPUNCT\t_\t_\tX\tpunct\t_\t_\n"
-#                         dic[ligne[0]]=id
-#                         id+=2
-#                 elif "." in token:    # On s'occupe de traiter le point.
-#                     tokens+=str(id)+"\t"+"\t".join(ligne[1:len(ligne)])+f"{id+1}\t.\t.\tPUNCT\t_\t_\tROOT\tpunct\t_\t_\n"
-#                     dic[ligne[0]]=id
-#                 elif "…" in token:    # On s'occupe de traiter le point.
-#                     tokens+=str(id)+"\t"+"\t".join(ligne[1:len(ligne)])+f"{id+1}\t…\t…\tPUNCT\t_\t_\tROOT\tpunct\t_\t_\n"
-#                     dic[ligne[0]]=id
-#                 elif "?" in token:    # On s'occupe de traiter le point.
-#                     print(token)
-#                     tokens+=f"{id}\t?\t?\tPUNCT\t_\t_\tROOT\tpunct\t_\t_\n"
-#                 else:
-#                     if re.match(r"\d+\-\d+",ligne[0]):  # On traite de nouveau le cas où il y a deux tokens en un.
-#                         tokens+=f"{str(id)}-{str(id+1)}\t"+"\t".join(ligne[1:len(ligne)])
-#                     else:
-#                         tokens+=str(id)+"\t"+"\t".join(ligne[1:len(ligne)])
-#                         dic[ligne[0]]=id
-#                         id+=1
-#                 n+=1
-#                 l_prec=ligne
-#                 ligne=fichier[i+n]
-#             tokens=tokens.split("\n")
-#             del tokens[len(tokens)-1]
-#             for ligne in range(len(tokens)):
-#                 ligne=tokens[ligne].split("\t")
-#                 if "root" in ligne[7]:    # On récupère l'id de la racine pour l'indiquer comme gouv du point.
-#                     root=ligne[0]
-#                     tokens2+="\t".join(ligne[0:10])+"\n"
-#                 elif ligne[2]==",":   # Pas de traitement ici puisque nous devrons compléter manuellement.
-# 					id_gov_vir=
-#                     tokens2+="\t".join(ligne[0:6])+"\t"+id_gov_vir+"\t"+"\t".join(ligne[7:10])+"\n"
-#                 elif ligne[2]=="." or ligne[2]=="?" or ligne[2]=="…": # Le gouverneur du point est toujours la racine.
-#                     tokens2+="\t".join(ligne[0:6])+"\t"+root+"\t"+"\t".join(ligne[7:10])+"\n"
-#                 elif re.match(r"\d+\-\d+",ligne[0]) or ligne[6]=="_":   # Ce type de lignes reste identique.
-#                     tokens2+="\t".join(ligne[0:10])+"\n"
-#                 else:
-#                     tokens2+="\t".join(ligne[0:6])+"\t"+str(dic[ligne[6]])+"\t"+"\t".join(ligne[7:10])+"\n"
-#             sortie.write(f"{tokens2}\n")
-# 			cpt+=1
-#         else:
-            # if not re.match(r'\d',fichier[i-1]):
-            #     sortie.write(ligne)    
